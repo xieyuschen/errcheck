@@ -2,9 +2,12 @@ package main
 
 import (
 	"bytes"
+	"go.uber.org/automaxprocs/maxprocs"
 	"io"
+	"log"
 	"os"
 	"regexp"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -12,6 +15,13 @@ import (
 )
 
 var dotStar = regexp.MustCompile(".*")
+
+func TestCPUAndGoMaxProcs(t *testing.T) {
+	t.Log("CPU number is:", runtime.NumCPU())
+
+	_, _ = maxprocs.Set(maxprocs.Logger(log.Printf))
+	t.Log("GOMAXPROCS number is:", runtime.GOMAXPROCS(0))
+}
 
 func TestMain(t *testing.T) {
 	saveStderr := os.Stderr
