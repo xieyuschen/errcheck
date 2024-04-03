@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"go.uber.org/automaxprocs/maxprocs"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -113,6 +114,9 @@ func logf(msg string, args ...interface{}) {
 }
 
 func mainCmd(args []string) int {
+	// set the GOMAXPROCS properly so it could work efficiently inside the container
+	_, _ = maxprocs.Set()
+
 	var checker errcheck.Checker
 	paths, rc := parseFlags(&checker, args)
 	if rc != exitCodeOk {
@@ -153,7 +157,7 @@ func checkPaths(c *errcheck.Checker, paths ...string) (errcheck.Result, error) {
 	var wg sync.WaitGroup
 	result := &errcheck.Result{}
 	mu := &sync.Mutex{}
-	for i := 0; i < runtime.NumCPU(); i++ {
+	for i := 0; i < runtime.GOMAXPROCS(0); i++ {
 		wg.Add(1)
 
 		go func() {
